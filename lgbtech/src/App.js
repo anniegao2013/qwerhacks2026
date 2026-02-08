@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import QueerSafetyMap from "./pages/QueerSafetyMap";
 
 /* ===================== Navbar ===================== */
 const Navbar = () => (
@@ -272,12 +273,7 @@ const ResumeFeedback = () => (
   </div>
 );
 
-const Map = () => (
-  <div style={styles.container}>
-    <h1>Queer Safety Map</h1>
-    <p>Map incoming</p>
-  </div>
-);
+const Map = QueerSafetyMap;
 
 /* ===================== App ===================== */
 export default function App() {
