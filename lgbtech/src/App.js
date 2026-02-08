@@ -5,8 +5,9 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 const Navbar = () => (
   <nav style={styles.nav}>
     <Link style={styles.navLink} to="/">Home</Link>
-    <Link style={styles.navLink} to="/scholarships">Scholarships</Link>
     <Link style={styles.navLink} to="/resume-feedback">Resume Feedback</Link>
+    <Link style={styles.navLink} to="/map">Queer Safety Map</Link>
+    <Link style={styles.navLink} to="/scholarships">Scholarships</Link>
   </nav>
 );
 
@@ -75,15 +76,8 @@ const Home = () => {
 
   return (
     <div style={styles.container}>
-      <h1>Company Queer-Friendliness Rankings</h1>
-
-      {/* Search */}
-      <input
-        style={styles.searchInput}
-        placeholder="Search company..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      <h1>LGBTech</h1>
+      <h5>Helping queer young adults find inclusive tech career pathways</h5>
 
       {/* Add Company */}
       <div style={styles.addForm}>
@@ -104,6 +98,16 @@ const Home = () => {
           Add Company
         </button>
       </div>
+
+      <h2>Companies</h2>
+
+      {/* Search */}
+      <input
+        style={styles.searchInput}
+        placeholder="Search company..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
       {/* Company List */}
       <div style={styles.verticalList}>
@@ -149,17 +153,129 @@ const Home = () => {
 };
 
 /* ===================== Pages ===================== */
-const Scholarships = () => (
-  <div style={styles.container}>
-    <h1>Scholarships</h1>
-    <p>Scholarship resources coming soon.</p>
-  </div>
-);
+const Scholarships = () => {
+  const scholarships = [
+    {
+      id: "la-lgbt",
+      title: "LA LGBT Youth Scholarship Program",
+      eligibility:
+        "LGBTQ+ students living in LA County pursuing secondary education",
+      deadline: "2026-03-27",
+      link: "https://lalgbtcenter.org/services/scholarships/",
+    },
+    {
+      id: "out-to-innovate",
+      title: "Out to Innovate Scholarship",
+      eligibility:
+        "LGBTQ+ undergraduates and graduates pursuing STEM degrees",
+      deadline: "2026-07-07",
+      link: "https://www.outtoinnovate.org/scholarships",
+    },
+    {
+      id: "markowski-leach",
+      title: "Markowski-Leach Scholarship",
+      eligibility:
+        "LGBTQ+ full-time students enrolled at a California university",
+      deadline: "2026-03-31",
+      link: "https://mlscholarships.org/",
+    },
+    {
+      id: "league-foundation",
+      title: "LEAGUE Foundation Scholarship",
+      eligibility:
+        "Graduating high school seniors who support the LGBTQ+ community",
+      deadline: "2026-04-15",
+      link: "https://www.leaguefoundation.org/index.php/application",
+    },
+  ];
+
+  const [goingToApply, setGoingToApply] = React.useState({});
+
+  // Load saved state
+  React.useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("scholarshipApps") || "{}");
+    setGoingToApply(saved);
+  }, []);
+
+  // Save state
+  React.useEffect(() => {
+    localStorage.setItem("scholarshipApps", JSON.stringify(goingToApply));
+  }, [goingToApply]);
+
+  const toggleApply = (id) => {
+    setGoingToApply((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  // Compute next upcoming deadline
+  const upcomingDeadlines = scholarships
+    .filter((s) => goingToApply[s.id])
+    .map((s) => new Date(s.deadline))
+    .sort((a, b) => a - b);
+
+  const nextDeadline =
+    upcomingDeadlines.length > 0
+      ? upcomingDeadlines[0].toLocaleDateString()
+      : null;
+
+  return (
+    <div style={styles.container}>
+      {nextDeadline && (
+        <div style={styles.notification}>
+          📅 Next scholarship deadline: <strong>{nextDeadline}</strong>
+        </div>
+      )}
+
+      <h1>Scholarships</h1>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        {scholarships.map((s) => (
+          <div key={s.id} style={styles.card}>
+            <div style={styles.cardContent}>
+              <div>
+                <h2>{s.title}</h2>
+                <p>
+                  <strong>Eligibility:</strong> {s.eligibility}
+                </p>
+                <p>
+                  <strong>Deadline:</strong>{" "}
+                  {new Date(s.deadline).toLocaleDateString()}
+                </p>
+                <a href={s.link} target="_blank" rel="noreferrer">
+                  Apply Here
+                </a>
+              </div>
+
+              <button
+                style={{
+                  ...styles.button,
+                  background: goingToApply[s.id] ? "#4caf50" : "#333",
+                }}
+                onClick={() => toggleApply(s.id)}
+              >
+                {goingToApply[s.id] ? "✓ Added" : "+"}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const ResumeFeedback = () => (
   <div style={styles.container}>
     <h1>Resume Feedback</h1>
     <p>Upload your resume for feedback.</p>
+  </div>
+);
+
+const Map = () => (
+  <div style={styles.container}>
+    <h1>Queer Safety Map</h1>
+    <p>Map incoming</p>
   </div>
 );
 
@@ -172,6 +288,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/scholarships" element={<Scholarships />} />
         <Route path="/resume-feedback" element={<ResumeFeedback />} />
+        <Route path="/map" element={<Map />} />
       </Routes>
     </Router>
   );
@@ -249,4 +366,12 @@ const styles = {
     borderRadius: "6px",
     cursor: "pointer",
   },
+  notification: {
+  background: "#fff3cd",
+  border: "1px solid #ffeeba",
+  padding: "12px",
+  borderRadius: "8px",
+  marginBottom: "16px",
+  fontWeight: "bold",
+ },
 };
