@@ -13,31 +13,16 @@ const Navbar = () => (
 /* ===================== Home ===================== */
 const Home = () => {
   const defaultCompanies = [
-    {
-      name: "Accenture",
-      applyLink: "https://www.accenture.com/us-en/careers",
-      flagged: false,
-    },
-    {
-      name: "Apple",
-      applyLink: "https://www.apple.com/careers/",
-      flagged: false,
-    },
-    {
-      name: "Google",
-      applyLink: "https://careers.google.com/",
-      flagged: false,
-    },
-    {
-      name: "IBM",
-      applyLink: "https://www.ibm.com/employment/",
-      flagged: false,
-    },
+    { name: "Accenture", applyLink: "https://www.accenture.com/us-en/careers", positive: 0, negative: 0 },
+    { name: "Apple", applyLink: "https://www.apple.com/careers/", positive: 0, negative: 0 },
+    { name: "Google", applyLink: "https://careers.google.com/", positive: 0, negative: 0 },
+    { name: "IBM", applyLink: "https://www.ibm.com/employment/", positive: 0, negative: 0 },
   ];
 
   const [companies, setCompanies] = useState([]);
   const [newName, setNewName] = useState("");
   const [newLink, setNewLink] = useState("");
+  const [search, setSearch] = useState("");
 
   /* Load from localStorage */
   useEffect(() => {
@@ -52,6 +37,21 @@ const Home = () => {
     }
   }, [companies]);
 
+  const getPercent = (c) => {
+    const total = c.positive + c.negative;
+    if (total === 0) return 0;
+    return Math.round((c.positive / total) * 100);
+  };
+
+  const sortCompanies = (list) =>
+    [...list].sort((a, b) => getPercent(b) - getPercent(a));
+
+  const vote = (index, type) => {
+    const updated = [...companies];
+    updated[index][type] += 1;
+    setCompanies(sortCompanies(updated));
+  };
+
   const addCompany = () => {
     if (!newName.trim() || !newLink.trim()) return;
 
@@ -60,34 +60,32 @@ const Home = () => {
       return;
     }
 
-    setCompanies([
-      { name: newName.trim(), applyLink: newLink.trim(), flagged: false },
+    setCompanies(sortCompanies([
+      { name: newName.trim(), applyLink: newLink.trim(), positive: 0, negative: 0 },
       ...companies,
-    ]);
+    ]));
 
     setNewName("");
     setNewLink("");
   };
 
-  const flagCompany = (index) => {
-    const updated = [...companies];
-    updated[index].flagged = true;
-    const item = updated.splice(index, 1)[0];
-    setCompanies([...updated, item]);
-  };
-
-  const unflagCompany = (index) => {
-    const updated = [...companies];
-    updated[index].flagged = false;
-    const item = updated.splice(index, 1)[0];
-    setCompanies([item, ...updated]);
-  };
+  const filteredCompanies = companies.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div style={styles.container}>
-      <h1>Company List</h1>
+      <h1>Company Queer-Friendliness Rankings</h1>
 
-      {/* Add Company Form */}
+      {/* Search */}
+      <input
+        style={styles.searchInput}
+        placeholder="Search company..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      {/* Add Company */}
       <div style={styles.addForm}>
         <h3>Add a Company</h3>
         <input
@@ -109,41 +107,42 @@ const Home = () => {
 
       {/* Company List */}
       <div style={styles.verticalList}>
-        {companies.map((company, index) => (
-          <div
-            key={company.name}
-            style={{
-              ...styles.card,
-              opacity: company.flagged ? 0.5 : 1,
-              backgroundColor: company.flagged ? "#f2f2f2" : "#fff",
-            }}
-          >
-            <div style={styles.cardContent}>
-              <div>
-                <h2>{company.name}</h2>
-                <a href={company.applyLink} target="_blank" rel="noreferrer">
-                  Apply
-                </a>
-              </div>
+        {filteredCompanies.map((company, index) => {
+          const percent = getPercent(company);
+          return (
+            <div key={company.name} style={styles.card}>
+              <div style={styles.cardContent}>
+                <div>
+                  <h2>{company.name}</h2>
+                  <a href={company.applyLink} target="_blank" rel="noreferrer">
+                    Apply
+                  </a>
+                  <p style={styles.percent}>
+                    Queer-Friendly: {percent}% ({company.positive + company.negative} votes)
+                  </p>
+                </div>
 
-              {company.flagged ? (
-                <button
-                  style={{ ...styles.button, background: "#4caf50" }}
-                  onClick={() => unflagCompany(index)}
-                >
-                  Unflag
-                </button>
-              ) : (
-                <button
-                  style={{ ...styles.button, background: "#ff4d4d" }}
-                  onClick={() => flagCompany(index)}
-                >
-                  Flag as Non-LGBTQ Friendly
-                </button>
-              )}
+                <div style={styles.voteButtons}>
+                  <button
+                    style={{ ...styles.button, background: "#4caf50" }}
+                    onClick={() => vote(companies.indexOf(company), "positive")}
+                  >
+                    👍 Positive
+                  </button>
+                  <button
+                    style={{ ...styles.button, background: "#f44336" }}
+                    onClick={() => vote(companies.indexOf(company), "negative")}
+                  >
+                    👎 Negative
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
+        {filteredCompanies.length === 0 && (
+          <p>No companies match your search.</p>
+        )}
       </div>
     </div>
   );
@@ -194,6 +193,12 @@ const styles = {
   container: {
     padding: "20px",
   },
+  searchInput: {
+    width: "100%",
+    maxWidth: "400px",
+    padding: "8px",
+    marginBottom: "16px",
+  },
   addForm: {
     maxWidth: "500px",
     border: "1px solid #ddd",
@@ -228,6 +233,14 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  percent: {
+    marginTop: "6px",
+    fontWeight: "bold",
+  },
+  voteButtons: {
+    display: "flex",
+    gap: "10px",
   },
   button: {
     color: "#fff",
