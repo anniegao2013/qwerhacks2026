@@ -21,13 +21,20 @@ const Navbar = () => (
 );
 
 /* ===================== Home ===================== */
-const Home = () => {
-  const defaultCompanies = [
+
+const defaultCompanies = [
     { name: "Accenture", applyLink: "https://www.accenture.com/us-en/careers", positive: 0, negative: 0 },
     { name: "Apple", applyLink: "https://www.apple.com/careers/", positive: 0, negative: 0 },
     { name: "Google", applyLink: "https://careers.google.com/", positive: 0, negative: 0 },
     { name: "IBM", applyLink: "https://www.ibm.com/employment/", positive: 0, negative: 0 },
   ];
+const Home = () => {
+//   const defaultCompanies = [
+//     { name: "Accenture", applyLink: "https://www.accenture.com/us-en/careers", positive: 0, negative: 0 },
+//     { name: "Apple", applyLink: "https://www.apple.com/careers/", positive: 0, negative: 0 },
+//     { name: "Google", applyLink: "https://careers.google.com/", positive: 0, negative: 0 },
+//     { name: "IBM", applyLink: "https://www.ibm.com/employment/", positive: 0, negative: 0 },
+//   ];
 
   const [companies, setCompanies] = useState([]);
   const [newName, setNewName] = useState("");
